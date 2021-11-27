@@ -4,12 +4,11 @@ import(
 	"minipro/user"
 	"minipro/handler"
 	"minipro/auth"
-	"minipro/helper"
+	"minipro/bantuan"
 	"github.com/labstack/echo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"strings"
-	"net/http"
+	
 )
 
 var db *gorm.DB
@@ -22,11 +21,17 @@ func main(){
 	}
 
 	userRepository := user.NewRepository(db)
+	bantuanRepository := bantuan.NewRepository(db)
+
+	
+	
+	bantuanService := bantuan.NewService(bantuanRepository)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
-	userHandler := handler.NewUserHandler(userService, authService)
 
+	userHandler := handler.NewUserHandler(userService, authService)
+	bantuanHandler := handler.NewBantuanHandler(bantuanService)
 	r := echo.New()
 	
 	api :=r.Group("api/v1")
@@ -34,37 +39,38 @@ func main(){
 	api.POST("/check_email", userHandler.CheckEmail)
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
-	api.POST("/images",authMiddlerware(authService,userService), userHandler.UploadImg)
+	api.POST("/images",userHandler.UploadImg)
+	api.GET("/bantuans", bantuanHandler.GetBantuans)
 	r.Start(":9000")
 }
 
-func authMiddlerware(authService auth.Service, userService user.Service) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(echoContext echo.Context) error {
-			//do the things
-			authHeader := "Authorization"
+// func authMiddlerware(authService auth.Service, userService user.Service) echo.MiddlewareFunc {
+// 	return func(next echo.HandlerFunc) echo.HandlerFunc {
+// 		return func(echoContext echo.Context) error {
+// 			//do the things
+// 			authHeader := "Authorization"
 
-		if !strings.Contains(authHeader, "Bearer") {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			return echoContext.JSON(http.StatusUnauthorized, response)
+// 		if !strings.Contains(authHeader, "Bearer") {
+// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+// 			return echoContext.JSON(http.StatusUnauthorized, response)
 			
-		}
+// 		}
 
-		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
+// 		tokenString := ""
+// 		arrayToken := strings.Split(authHeader, " ")
+// 		if len(arrayToken) == 2 {
+// 			tokenString = arrayToken[1]
+// 		}
 
-		token, err := authService.ValidateToken(tokenString)
-		if err != nil {
-			Response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			return echoContext.JSON(http.StatusUnauthorized, Response)
+// 		token, err := authService.ValidateToken(tokenString)
+// 		if err != nil {
+// 			Response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+// 			return echoContext.JSON(http.StatusUnauthorized, Response)
 			
 			
-		}
+// 		}
 		
 
-		return next(echoContext)
-	}
-}}
+// 		return next(echoContext)
+// 	}
+// }}
