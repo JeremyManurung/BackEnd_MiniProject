@@ -10,7 +10,6 @@ import (
 	"minipro/auth"
 	"github.com/labstack/echo"
 )
-
 type userHandler struct {
 	userService user.Service
 	authService auth.Service

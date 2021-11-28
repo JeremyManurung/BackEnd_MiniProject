@@ -2,9 +2,13 @@ package main
 
 import(
 	"minipro/user"
+	"minipro/helper"
 	"minipro/handler"
 	"minipro/auth"
 	"minipro/bantuan"
+	"strings"
+	"net/http"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -23,54 +27,65 @@ func main(){
 	userRepository := user.NewRepository(db)
 	bantuanRepository := bantuan.NewRepository(db)
 
-	
-	
 	bantuanService := bantuan.NewService(bantuanRepository)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
-
+	
 	userHandler := handler.NewUserHandler(userService, authService)
 	bantuanHandler := handler.NewBantuanHandler(bantuanService)
 	r := echo.New()
-	
+	r.Static("/gambar", "./gambar")
 	api :=r.Group("api/v1")
 
 	api.POST("/check_email", userHandler.CheckEmail)
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
+	api.POST("/images",userHandler.UploadImg, authMiddleware(userService, authService))
 	api.POST("/images",userHandler.UploadImg)
 	api.GET("/bantuans", bantuanHandler.GetBantuans)
 	r.Start(":9000")
 }
 
-// func authMiddlerware(authService auth.Service, userService user.Service) echo.MiddlewareFunc {
-// 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-// 		return func(echoContext echo.Context) error {
-// 			//do the things
-// 			authHeader := "Authorization"
+func authMiddleware(authService auth.Service, userService user.Service) echo.MiddlewareFunc{
+return func (next echo.HandlerFunc) echo.HandlerFunc{
+	return func(echoContext echo.Context) error{
+	authHeader := "Authorization"
 
-// 		if !strings.Contains(authHeader, "Bearer") {
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			return echoContext.JSON(http.StatusUnauthorized, response)
+	if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return echoContext.JSON(http.StatusUnauthorized, response)
 			
-// 		}
+		}
 
-// 		tokenString := ""
-// 		arrayToken := strings.Split(authHeader, " ")
-// 		if len(arrayToken) == 2 {
-// 			tokenString = arrayToken[1]
-// 		}
+		tokenString := ""
+		arrayToken := strings.Split(authHeader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
 
-// 		token, err := authService.ValidateToken(tokenString)
-// 		if err != nil {
-// 			Response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			return echoContext.JSON(http.StatusUnauthorized, Response)
-			
-			
-// 		}
-		
+		token, err := authService.ValidateToken(tokenString)
+		if err != nil{
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return echoContext.JSON(http.StatusUnauthorized, response)
+		}
 
-// 		return next(echoContext)
-// 	}
-// }}
+		claim, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid{
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return echoContext.JSON(http.StatusUnauthorized, response)
+		}
+
+		userID := int(claim["user_id"].(float64))
+
+		user, err := userService.GetUserByID(userID)
+		if err != nil{
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return echoContext.JSON(http.StatusUnauthorized, response)
+		}
+
+		echoContext.Set("currentUser", user)
+		return next(echoContext)
+}
+}
+}

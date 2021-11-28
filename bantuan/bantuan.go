@@ -11,7 +11,7 @@ type Bantuan struct{
 	JumlahPendonasi 	int
 	UserID 				int
 	TittleBantuan 		string
-	Param				string
+	Prm					string
 	JumlahTarget 		int
 	Created				time.Time
 	Updated				time.Time

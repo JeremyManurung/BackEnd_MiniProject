@@ -1,7 +1,13 @@
 package bantuan
 
+import (
+	"fmt"
+	"github.com/gosimple/slug"
+)
+
 type Service interface {
 	FindBantuans(userID int) ([]Bantuan, error)
+	CreateBantuan(input CreateBantuanInput) (Bantuan, error)
 }
 
 type service struct {
@@ -29,5 +35,27 @@ func (s *service) FindBantuans(userID int) ([]Bantuan, error) {
 
 	return bantuans, nil
 }
+
+func (s *service) CreateBantuan(input CreateBantuanInput) (Bantuan, error) {
+	bantuan := Bantuan{}
+	bantuan.TittleBantuan = input.TittleBantuan
+	bantuan.DeskripsiSingkat = input.DeskripsiSingkat
+	bantuan.Deskripsi = input.Deskripsi
+	bantuan.ListKondisi = input.ListKondisi
+	bantuan.JumlahTarget = input.JumlahTarget
+	bantuan.UserID = input.User.ID
+
+	slugCandidate := fmt.Sprintf("%s %d", input.TittleBantuan, input.User.ID)
+	bantuan.Prm = slug.Make(slugCandidate)
+
+	newBantuan, err := s.repository.Save(bantuan)
+	if err != nil {
+		return newBantuan, err
+	}
+
+	return newBantuan, nil
+}
+
+
 
 
