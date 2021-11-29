@@ -6,6 +6,7 @@ import(
 	"minipro/handler"
 	"minipro/auth"
 	"minipro/bantuan"
+	"github.com/labstack/echo/middleware"
 	"strings"
 	"net/http"
 	"github.com/dgrijalva/jwt-go"
@@ -41,25 +42,29 @@ func main(){
 	api.POST("/check_email", userHandler.CheckEmail)
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
-	api.POST("/images",userHandler.UploadImg, authMiddleware(userService, authService))
-	api.POST("/images",userHandler.UploadImg)
+	api.POST("/images",userHandler.UploadImg, authMiddleware(authService, userService))
 	api.GET("/bantuans", bantuanHandler.GetBantuans)
+	api.POST("/bantuans", bantuanHandler.CreateBantuan,middleware.JWT([]byte("jeremy_ganteng")))
 	r.Start(":9000")
 }
 
 func authMiddleware(authService auth.Service, userService user.Service) echo.MiddlewareFunc{
 return func (next echo.HandlerFunc) echo.HandlerFunc{
 	return func(echoContext echo.Context) error{
-	authHeader := "Authorization"
 
-	if !strings.Contains(authHeader, "Bearer") {
+		authHeader:= new(handler.TesAuth)
+		if err := echoContext.Bind(&authHeader); err != nil {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			return echoContext.JSON(http.StatusUnauthorized, response)
-			
+		}
+	
+		if !strings.Contains(authHeader.Authorization, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return echoContext.JSON(http.StatusUnauthorized, response)
 		}
 
 		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
+		arrayToken := strings.Split(authHeader.Authorization, " ")
 		if len(arrayToken) == 2 {
 			tokenString = arrayToken[1]
 		}

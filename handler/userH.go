@@ -15,6 +15,10 @@ type userHandler struct {
 	authService auth.Service
 }
 
+type TesAuth struct{
+	Authorization	string `header:"Authorization"`
+}
+
 func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
 	return &userHandler{userService,authService}
 }
@@ -139,7 +143,9 @@ func(h *userHandler) UploadImg(echoContext echo.Context) error {
 		return echoContext.JSON(http.StatusBadRequest, Response)
 	}
 
-	userID := 2
+	currentUser:= echoContext.Get("currentUser").(user.User)
+	userID := currentUser.ID
+
 	tes := fmt.Sprintf("gambar/%d-%s",userID,file.Filename)
 	_, err = h.userService.SaveImg(userID, tes)
 	if err != nil {

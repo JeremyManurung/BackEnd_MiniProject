@@ -3,7 +3,7 @@ package bantuan
 import ("time")
 
 type Bantuan struct{
-	ID					int
+	ID					int 
 	JumlahBar 			int
 	Deskripsi 			string
 	DeskripsiSingkat 	string
