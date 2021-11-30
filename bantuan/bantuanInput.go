@@ -5,14 +5,14 @@ import(
 )
 
 type GetBantuanDetailInput struct {
-	ID int `uri:"id" validate:"required"`
+	ID int `param:"id" validate:"required"`
 }
 
 type CreateBantuanInput struct {
 	TittleBantuan             string `json:"tittle_bantuan" validate:"required"`
-	DeskripsiSingkat 		  string `json:"short_description" binding:"required"`
-	Deskripsi   	   		  string `json:"description" binding:"required"`
-	JumlahTarget       	 	  int    `json:"goal_amount" binding:"required"`
-	ListKondisi            	  string `json:"perks" binding:"required"`
+	DeskripsiSingkat 		  string `json:"deskripsi_singkat" validate:"required"`
+	Deskripsi   	   		  string `json:"deskripsi" validate:"required"`
+	JumlahTarget       	 	  int    `json:"jumlah_targe" validate:"required"`
+	ListKondisi            	  string `json:"list_kondisi" validate:"required"`
 	User             		  user.User
 }

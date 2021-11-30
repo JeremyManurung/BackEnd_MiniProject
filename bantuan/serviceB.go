@@ -8,6 +8,7 @@ import (
 type Service interface {
 	FindBantuans(userID int) ([]Bantuan, error)
 	CreateBantuan(input CreateBantuanInput) (Bantuan, error)
+	FindBantuanByID(input GetBantuanDetailInput) (Bantuan, error)
 }
 
 type service struct {
@@ -34,6 +35,16 @@ func (s *service) FindBantuans(userID int) ([]Bantuan, error) {
 	}
 
 	return bantuans, nil
+}
+
+func (s *service) FindBantuanByID(input GetBantuanDetailInput) (Bantuan, error) {
+	bantuan, err := s.repository.FindByID(input.ID)
+
+	if err != nil {
+		return bantuan, err
+	}
+
+	return bantuan, nil
 }
 
 func (s *service) CreateBantuan(input CreateBantuanInput) (Bantuan, error) {

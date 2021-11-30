@@ -6,7 +6,7 @@ import(
 	"minipro/handler"
 	"minipro/auth"
 	"minipro/bantuan"
-	"github.com/labstack/echo/middleware"
+	"minipro/transaksi"
 	"strings"
 	"net/http"
 	"github.com/dgrijalva/jwt-go"
@@ -27,6 +27,7 @@ func main(){
 
 	userRepository := user.NewRepository(db)
 	bantuanRepository := bantuan.NewRepository(db)
+	// transaksiRepository := transaksi.NewRepository(db)
 
 	bantuanService := bantuan.NewService(bantuanRepository)
 	userService := user.NewService(userRepository)
@@ -43,8 +44,10 @@ func main(){
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
 	api.POST("/images",userHandler.UploadImg, authMiddleware(authService, userService))
+
 	api.GET("/bantuans", bantuanHandler.GetBantuans)
-	api.POST("/bantuans", bantuanHandler.CreateBantuan,middleware.JWT([]byte("jeremy_ganteng")))
+	api.POST("/bantuans", bantuanHandler.CreateBantuan,authMiddleware(authService, userService))
+	api.GET("/bantuans/:id",bantuanHandler.GetBantuan)
 	r.Start(":9000")
 }
 
@@ -52,19 +55,22 @@ func authMiddleware(authService auth.Service, userService user.Service) echo.Mid
 return func (next echo.HandlerFunc) echo.HandlerFunc{
 	return func(echoContext echo.Context) error{
 
-		authHeader:= new(handler.TesAuth)
-		if err := echoContext.Bind(&authHeader); err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			return echoContext.JSON(http.StatusUnauthorized, response)
-		}
-	
-		if !strings.Contains(authHeader.Authorization, "Bearer") {
+		auth := ""
+			for name, values := range echoContext.Request().Header {
+				for _, value := range values {
+					if name == "Authorization" {
+						auth = value
+					}
+				}
+			}
+
+		if !strings.Contains(auth, "Bearer") {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			return echoContext.JSON(http.StatusUnauthorized, response)
 		}
 
 		tokenString := ""
-		arrayToken := strings.Split(authHeader.Authorization, " ")
+		arrayToken := strings.Split(auth, " ")
 		if len(arrayToken) == 2 {
 			tokenString = arrayToken[1]
 		}

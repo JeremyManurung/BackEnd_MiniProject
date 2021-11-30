@@ -30,6 +30,27 @@ func(h *bantuanHandler) GetBantuans(echoContext echo.Context) error{
 	return echoContext.JSON(http.StatusOK, Response)
 }
 
+func(h *bantuanHandler) GetBantuan(echoContext echo.Context) error {
+	var input bantuan.GetBantuanDetailInput
+
+	err := echoContext.Bind(&input)
+	if err != nil {
+		Response := helper.APIResponse("Tidak ada detail bantuan", http.StatusBadRequest, "error", nil)
+		return echoContext.JSON(http.StatusBadRequest, Response)
+	}
+
+	bantuan, err := h.service.FindBantuanByID(input)
+	if err != nil {
+		Response := helper.APIResponse("Tidak ada detail bantuan", http.StatusBadRequest, "error", nil)
+		return echoContext.JSON(http.StatusBadRequest, Response)
+	}
+
+	Response := helper.APIResponse("list bantuan", http.StatusOK, "succes", bantuan)
+	return echoContext.JSON(http.StatusOK, Response)
+}
+
+
+
 func (h *bantuanHandler) CreateBantuan(echoContext echo.Context) error {
 	var input bantuan.CreateBantuanInput
 

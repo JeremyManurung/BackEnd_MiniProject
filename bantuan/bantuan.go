@@ -1,6 +1,9 @@
 package bantuan
 
-import ("time")
+import (
+	"time"
+	"minipro/user"
+)
 
 type Bantuan struct{
 	ID					int 
@@ -16,6 +19,7 @@ type Bantuan struct{
 	Created				time.Time
 	Updated				time.Time
 	BantuanImgs			[]BantuanImg
+	User				user.User
 }
 
 type BantuanImg struct {
