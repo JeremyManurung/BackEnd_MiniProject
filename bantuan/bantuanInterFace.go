@@ -57,8 +57,19 @@ type BantuanDetailFormatter struct {
 	UserID           	int                      `json:"user_id"`
 	Prm             	string                   `json:"prm"`
 	ListKondisi         []string                 `json:"list_kondisi"`
+	Imgs				[]BantuanImgFormatter	 `json:"Image"`
+	User				BantuanUserFormatter	 `json:"user"`
 }
 
+type BantuanUserFormatter struct {
+	Nama     string `json:"nama"`
+	ImgUrl 	 string `json:"img_url"`
+}
+
+type BantuanImgFormatter struct {
+	ImgUrl 	 	string `json:"img_url"`
+	ImgUtama	bool 	`json:"img_utama"`
+}
 
 func FormatBantuanDetail(bantuan Bantuan) BantuanDetailFormatter {
 	bantuanDetailFormatter := BantuanDetailFormatter{}
@@ -85,5 +96,30 @@ func FormatBantuanDetail(bantuan Bantuan) BantuanDetailFormatter {
 
 	bantuanDetailFormatter.ListKondisi = listkondisis
 
+	user := bantuan.User
+	bantuanUserFormatter := BantuanUserFormatter{}
+	bantuanUserFormatter.Nama = user.Nama
+	bantuanUserFormatter.ImgUrl = user.UserImg
+
+	
+	bantuanDetailFormatter.User = bantuanUserFormatter
+
+	imgs := []BantuanImgFormatter{}
+
+	for _, img:= range bantuan.BantuanImgs{
+		bantuanImgFormatter := BantuanImgFormatter{}
+		bantuanImgFormatter.ImgUrl = img.TittleImg
+
+		imgUtama := false
+			if img.ImgUtama == 1{
+				imgUtama = true
+			}
+		bantuanImgFormatter.ImgUtama = imgUtama
+
+		imgs = append(imgs, bantuanImgFormatter)
+	}
+
+	bantuanDetailFormatter.Imgs = imgs
 	return bantuanDetailFormatter
 }
+
