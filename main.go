@@ -51,6 +51,7 @@ func main(){
 	api.GET("/bantuans/:id",bantuanHandler.GetBantuan)
 
 	api.GET("/bantuan/:id/transaksis", transaksiHandler.GetBantuanTransaksis,authMiddleware(authService, userService))
+	api.GET("/transaksi", transaksiHandler.GetUserTransaksis,authMiddleware(authService, userService))
 	r.Start(":9000")
 }
 
