@@ -9,6 +9,8 @@ type repository struct {
 type Repository interface {
 	GetByBantuanID(bantuanID int) ([]Transaksi, error)
 	GetByUserID(userID int)([]Transaksi, error)
+	Save(transaksi Transaksi) (Transaksi, error)
+	Update(transaksi Transaksi) (Transaksi, error)
 }
 
 func NewRepository(db *gorm.DB) *repository {
@@ -35,4 +37,26 @@ func (r *repository) GetByUserID(userID int) ([]Transaksi, error) {
 	}
 
 	return transaksis, nil
+}
+
+func (r *repository) Save(transaksi Transaksi) (Transaksi, error) {
+	err := r.db.Create(&transaksi).Error
+
+	if err != nil {
+		return transaksi, err
+	}
+
+	return transaksi, nil
+	
+}
+
+func (r *repository) Update(transaksi Transaksi) (Transaksi, error) {
+	err := r.db.Save(&transaksi).Error
+
+	if err != nil {
+		return transaksi, err
+	}
+
+	return transaksi, nil
+	
 }

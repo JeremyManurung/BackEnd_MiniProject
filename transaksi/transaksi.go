@@ -12,7 +12,8 @@ type Transaksi struct {
 	UserID     			int
 	JumlahUang     		int
 	StatusTransaksi     string
-	CodeTransaksi       string
+	KodeTransaksi       string
+	PembayaranUrl		string
 	User				user.User
 	Bantuan				bantuan.Bantuan
 	Created 		 	time.Time

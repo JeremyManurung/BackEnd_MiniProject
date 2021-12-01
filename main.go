@@ -7,6 +7,8 @@ import(
 	"minipro/auth"
 	"minipro/bantuan"
 	"minipro/transaksi"
+	"minipro/pembayaran"
+	"minipro/komentar"
 	"strings"
 	"net/http"
 	"github.com/dgrijalva/jwt-go"
@@ -28,15 +30,19 @@ func main(){
 	userRepository := user.NewRepository(db)
 	bantuanRepository := bantuan.NewRepository(db)
 	transaksiRepository := transaksi.NewRepository(db)
+	komentarRepository := komentar.NewRepository(db)
 
 	bantuanService := bantuan.NewService(bantuanRepository)
 	userService := user.NewService(userRepository)
+	komentarService := komentar.NewService(komentarRepository)
 	authService := auth.NewService()
-	transaksiService := transaksi.NewService(transaksiRepository, bantuanRepository)
-	
+	pembayaranService := pembayaran.NewService()
+	transaksiService := transaksi.NewService(transaksiRepository, bantuanRepository, pembayaranService)
+
 	userHandler := handler.NewUserHandler(userService, authService)
 	bantuanHandler := handler.NewBantuanHandler(bantuanService)
 	transaksiHandler := handler.NewTransaksiHandler(transaksiService)
+	komentarHandler := handler.NewKomentarHandler(komentarService)
 	r := echo.New()
 	r.Static("/gambar", "./gambar")
 	api :=r.Group("api/v1")
@@ -52,6 +58,10 @@ func main(){
 
 	api.GET("/bantuan/:id/transaksis", transaksiHandler.GetBantuanTransaksis,authMiddleware(authService, userService))
 	api.GET("/transaksi", transaksiHandler.GetUserTransaksis,authMiddleware(authService, userService))
+	api.POST("/transaksi", transaksiHandler.CreateTransaksi, authMiddleware(authService, userService))
+
+	api.POST("/komentar", komentarHandler.CreateKomentar, authMiddleware(authService, userService))
+
 	r.Start(":9000")
 }
 
