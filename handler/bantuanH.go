@@ -59,7 +59,7 @@ func (h *bantuanHandler) CreateBantuan(echoContext echo.Context) error {
 
 	newBantuan, err := h.service.CreateBantuan(input)
 	if err != nil {
-		Response := helper.APIResponse("Berhasil Membuat Bantuan", http.StatusOK, "success", bantuan.FormatBantuan(newBantuan))
+		Response := helper.APIResponse("Gagal Membuat Bantuan", http.StatusBadRequest, "error", nil)
 		return echoContext.JSON(http.StatusOK, Response)
 	}
 	
