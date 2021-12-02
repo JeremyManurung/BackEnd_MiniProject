@@ -8,7 +8,8 @@ import (
 type Service interface {
 	FindBantuans(userID int) ([]Bantuan, error)
 	CreateBantuan(input CreateBantuanInput) (Bantuan, error)
-	FindBantuanByID(input GetBantuanDetailInput) (Bantuan, error)
+	FindBantuanByID(input int) (Bantuan, error)
+	UpdateBantuan(inputID int, inputData CreateBantuanInput)(Bantuan,error)
 }
 
 type service struct {
@@ -37,8 +38,8 @@ func (s *service) FindBantuans(userID int) ([]Bantuan, error) {
 	return bantuans, nil
 }
 
-func (s *service) FindBantuanByID(input GetBantuanDetailInput) (Bantuan, error) {
-	bantuan, err := s.repository.FindByID(input.ID)
+func (s *service) FindBantuanByID(input int) (Bantuan, error) {
+	bantuan, err := s.repository.FindByID(input)
 
 	if err != nil {
 		return bantuan, err
@@ -68,5 +69,23 @@ func (s *service) CreateBantuan(input CreateBantuanInput) (Bantuan, error) {
 }
 
 
+func (s *service) UpdateBantuan(inputID int, inputData CreateBantuanInput) (Bantuan, error) {
+	bantuan, err := s.repository.FindByID(inputID)
+	if err != nil{
+		return bantuan,err
+	}
 
+	bantuan.TittleBantuan = inputData.TittleBantuan
+	bantuan.DeskripsiSingkat = inputData.DeskripsiSingkat
+	bantuan.Deskripsi = inputData.Deskripsi
+	bantuan.ListKondisi = inputData.ListKondisi
+	bantuan.JumlahTarget = inputData.JumlahTarget
 
+	updatedBantuan, err := s.repository.Update(bantuan)
+	if err != nil{
+		return updatedBantuan,err
+	}
+
+	return updatedBantuan, nil
+
+}

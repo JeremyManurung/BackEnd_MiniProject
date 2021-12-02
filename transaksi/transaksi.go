@@ -16,3 +16,4 @@ type Transaksi struct {
 	Created 		 	time.Time
 	Updated  			time.Time
 }
+
