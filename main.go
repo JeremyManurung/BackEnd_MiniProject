@@ -20,7 +20,7 @@ import(
 
 var db *gorm.DB
 func main(){
-	dsn := "root:@tcp(127.0.0.1:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:@tcp(host.docker.internal:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if (err != nil) {
