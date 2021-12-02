@@ -7,15 +7,20 @@ import (
 	"io"
 	"fmt"
 	"minipro/user"
+	"minipro/auth"
 	"github.com/labstack/echo"
 )
-
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+type TesAuth struct{
+	Authorization	string `header:"Authorization"`
+}
+
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService,authService}
 }
 
 func(h *userHandler) RegisterUser(echoContext echo.Context) error {
@@ -33,7 +38,12 @@ func(h *userHandler) RegisterUser(echoContext echo.Context) error {
 		return echoContext.JSON(http.StatusBadRequest, Response)
 	}
 
-	formatter := user.FormatUser(NewUser, "testes")
+	token, err := h.authService.GenerateToken(NewUser.ID)
+	if err != nil {
+		Response := helper.APIResponse("Register Gagal", http.StatusBadRequest, "error", nil)
+		return echoContext.JSON(http.StatusBadRequest, Response)
+	}
+	formatter := user.FormatUser(NewUser, token)
 	Response := helper.APIResponse("Berhasil Register", http.StatusOK, "status", formatter)
 	return echoContext.JSON(http.StatusOK, Response)
 }
@@ -53,7 +63,13 @@ func(h *userHandler) Login(echoContext echo.Context) error {
 		return echoContext.JSON(http.StatusBadRequest, Response)
 	}
 
-	formatter := user.FormatUser(LoginUser, "testes")
+	token, err := h.authService.GenerateToken(LoginUser.ID)
+	if err != nil {
+		Response := helper.APIResponse("Login Gagal", http.StatusBadRequest, "error", nil)
+		return echoContext.JSON(http.StatusBadRequest, Response)
+	}
+
+	formatter := user.FormatUser(LoginUser, token)
 	Response := helper.APIResponse("Berhasil Login", http.StatusOK, "status", formatter)
 	return echoContext.JSON(http.StatusOK, Response)
 }
@@ -127,7 +143,9 @@ func(h *userHandler) UploadImg(echoContext echo.Context) error {
 		return echoContext.JSON(http.StatusBadRequest, Response)
 	}
 
-	userID := 2
+	currentUser:= echoContext.Get("currentUser").(user.User)
+	userID := currentUser.ID
+
 	tes := fmt.Sprintf("gambar/%d-%s",userID,file.Filename)
 	_, err = h.userService.SaveImg(userID, tes)
 	if err != nil {
