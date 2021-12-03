@@ -2,7 +2,7 @@ package user
 
 import(
 	"errors"
-	"golang.org/x/crypto/bcrypt"
+// 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
