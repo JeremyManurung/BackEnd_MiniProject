@@ -10,6 +10,7 @@ import (
 	"minipro/auth"
 	"github.com/labstack/echo"
 )
+
 type userHandler struct {
 	userService user.Service
 	authService auth.Service
@@ -43,6 +44,7 @@ func(h *userHandler) RegisterUser(echoContext echo.Context) error {
 		Response := helper.APIResponse("Register Gagal", http.StatusBadRequest, "error", nil)
 		return echoContext.JSON(http.StatusBadRequest, Response)
 	}
+
 	formatter := user.FormatUser(NewUser, token)
 	Response := helper.APIResponse("Berhasil Register", http.StatusOK, "status", formatter)
 	return echoContext.JSON(http.StatusOK, Response)
@@ -100,12 +102,12 @@ func(h *userHandler) CheckEmail(echoContext echo.Context) error {
 	}else{
 		metaMessage = "Email Sudah Terdaftar"
 	}
-
 	Response := helper.APIResponse(metaMessage, http.StatusOK, "status", data)
 	return echoContext.JSON(http.StatusOK, Response)
 }
 
 func(h *userHandler) UploadImg(echoContext echo.Context) error {
+
 	file, err := echoContext.FormFile("img")
 	if err != nil {
 		data :=  map [string] interface {}{
@@ -117,7 +119,7 @@ func(h *userHandler) UploadImg(echoContext echo.Context) error {
 
 	src, err := file.Open()
 	if err != nil {
-			data :=  map [string] interface {}{
+		data :=  map [string] interface {}{
 		"is_uploaded" : false,
 	}
 		Response := helper.APIResponse("Login Gagal", http.StatusBadRequest, "error", data)
@@ -127,7 +129,7 @@ func(h *userHandler) UploadImg(echoContext echo.Context) error {
 
 	dst, err := os.Create(file.Filename)
 	if err != nil {
-			data :=  map [string] interface {}{
+		data :=  map [string] interface {}{
 		"is_uploaded" : false,
 	}
 		Response := helper.APIResponse("Login Gagal", http.StatusBadRequest, "error", data)

@@ -61,6 +61,7 @@ func (h *transaksiHandler) CreateTransaksi(echoContext echo.Context) error{
 		Response := helper.APIResponse("Gagal Melakukan transaksi", http.StatusBadRequest, "error", nil)
 		return echoContext.JSON(http.StatusOK, Response)
 	}
+	
 	Response := helper.APIResponse("Transaksi Berhail dibuat", http.StatusOK, "succes", transaksi.FormatTransaksi(newTransaksi))
 	return echoContext.JSON(http.StatusOK, Response)	
 }	

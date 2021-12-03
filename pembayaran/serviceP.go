@@ -21,7 +21,7 @@ func NewService() *service{
 func (s *service) GetPembayaranUrl(transaksi Transaksi, user user.User) (string, error){
 	midclient := midtrans.NewClient()
     midclient.ServerKey = ""
-    midclient.ClientKey = ""
+	midclient.ClientKey = ""
     midclient.APIEnvType = midtrans.Sandbox
 
     

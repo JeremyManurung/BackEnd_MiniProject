@@ -15,11 +15,11 @@ import(
 	"github.com/labstack/echo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	
 )
 
 var db *gorm.DB
 func main(){
+	
 	dsn := "root:@tcp(host.docker.internal:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -43,6 +43,7 @@ func main(){
 	bantuanHandler := handler.NewBantuanHandler(bantuanService)
 	transaksiHandler := handler.NewTransaksiHandler(transaksiService)
 	komentarHandler := handler.NewKomentarHandler(komentarService)
+	
 	r := echo.New()
 	r.Static("/gambar", "./gambar")
 	api :=r.Group("api/v1")
@@ -62,7 +63,7 @@ func main(){
 
 	api.POST("/komentar", komentarHandler.CreateKomentar, authMiddleware(authService, userService))
 
-	r.Start(":9000")
+	r.Start(":9900")
 }
 
 func authMiddleware(authService auth.Service, userService user.Service) echo.MiddlewareFunc{
